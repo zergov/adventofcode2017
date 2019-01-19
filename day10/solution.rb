@@ -4,25 +4,38 @@
 # Move the current position forward by that length plus the skip size.
 # Increase the skip size by one.
 
-input = File.read('input.txt')
-list = (0...256).to_a
+def knot_hash(input)
+  list = (0...256).to_a
+  current = 0
+  skip = 0
+  lengths = input.chars.map(&:ord) + [17, 31, 73, 47, 23]
 
-current = 0
-skip = 0
-lengths = input.split(',').map(&:to_i)
+  64.times do
+    lengths.each do |n|
+      # update current position
+      list.rotate!(current)
 
-lengths.each do |n|
-  # update current position
-  list.rotate!(current)
+      list = list.shift(n).reverse + list
 
-  list = list.shift(n).reverse + list
+      list.rotate!(-current)
 
-  list.rotate!(-current)
+      current += n + skip
 
-  current += n + skip
+      # increate skip
+      skip += 1
+    end
+  end
 
-  # increate skip
-  skip += 1
+  # sparse hash
+  16.times
+    .map { list.shift(16).reduce(:^) }
+    .map {|x| x.to_s(16).rjust(2, '0')}
+    .join
 end
 
-p list.take(2).reduce(:*)
+
+input = File.read('input.txt').strip
+
+#part 1
+# p knot_hash(input).chars.take(2).map(&:to_i).reduce(:*)
+p knot_hash(input)
